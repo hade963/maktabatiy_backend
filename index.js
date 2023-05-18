@@ -14,7 +14,7 @@ app.use(bodyParser.json());
 const sessionStore = new MySqlStore({}, db);
 app.use(
   session({
-    secret: process.env.SECRET,
+    secret: process.env.SECRET || 'adjfadjfq@#$!#$%@$',
     cookie: { httpOnly: true, maxAge: 24 * 60 * 60 * 1000 },
     resave: false,
     store: sessionStore,
