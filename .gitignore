@@ -1,0 +1,5 @@
+node_modules
+.env
+populate.js
+yarn-error.log
+readme.md
