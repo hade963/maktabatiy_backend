@@ -2,7 +2,7 @@
   "name": "backend",
   "version": "1.0.0",
   "description": "the backend of book library project",
-  "main": "app.js",
+  "main": "index.js",
   "license": "MIT",
   "scripts": {
     "start": "node app.js",
