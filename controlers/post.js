@@ -2,9 +2,9 @@ const db = require("../db");
 const passport = require("passport");
 const multer = require("multer");
 const { query, body, validationResult } = require("express-validator");
-const path = require("node:path");
+const path = require('path');
 const { queryDb } = require("../utils");
-const { rmSync } = require("node:fs");
+const { rmSync } = require("fs");
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     cb(null, "uploads/");

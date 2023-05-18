@@ -5,7 +5,7 @@ const passport = require("passport");
 const jwt = require("jsonwebtoken");
 const { queryDb } = require("../utils");
 const multer = require("multer");
-const path = require('node:path');
+const path = require('path');
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
