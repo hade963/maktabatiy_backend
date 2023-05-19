@@ -2,7 +2,7 @@ const mysql = require('mysql');
 require('dotenv').config();
 
 let connection;
-if(process.env.NODE_ENV = 'production') { 
+if(process.env.NODE_ENV === 'production') { 
   connection = mysql.createPool({
     connectionLimit: 10,
     host: process.env.db_host,

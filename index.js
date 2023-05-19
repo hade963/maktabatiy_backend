@@ -34,19 +34,19 @@ const postRouter = require("./routes/posts");
 app.use("/user", userRouter);
 app.use("/posts", postRouter);
 
+db.on('connection', function (connection) {
+  console.log('db connected');
+});
+
+app.listen(3000, () => {
+  console.log(`server started on port 3000`);
+});
+process.on('unhandledRejection', (err) => {
+  console.log(err.message)
+  // Log to file 
+}) 
 app.use((err, req, res, next) => { 
   return res.status(500).json({
     msg: "حصل خطاء في السيرفر",
   });
 })
-
-db.on('connection', function (connection) {
-  app.listen(3000, () => {
-    console.info(`server started on port 300`);
-  });
-});
-
-process.on('unhandledRejection', (err) => {
-  console.log(err.message)
-  // Log to file 
-}) 
