@@ -2,7 +2,7 @@ const db = require("../db");
 const passport = require("passport");
 const multer = require("multer");
 const { query, body, validationResult } = require("express-validator");
-const path = require('path');
+const path = require("path");
 const { queryDb } = require("../utils");
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
@@ -38,26 +38,34 @@ exports.create_post = [
         });
       } else {
         const createdDate = new Date();
+        const year = createdDate.getFullYear();
+        const month = `${createdDate.getMonth() + 1}`.padStart(2, "0");
+        const day = `${createdDate.getDate()}`.padStart(2, "0");
+
+        // get the hours, minutes, and seconds as separate strings
+        const hours = `${createdDate.getHours()}`.padStart(2, "0");
+        const minutes = `${createdDate.getMinutes()}`.padStart(2, "0");
+        const seconds = `${createdDate.getSeconds()}`.padStart(2, "0");
+
+        // combine the createdDate and time strings into a single string in the desired format
+        const dateTimeString = `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
         const postdetails = [
           req.user,
           req.body.title,
           req.body.content,
           req.body.price,
-          createdDate,
+          dateTimeString,
         ];
         const imageRegEx = /\.(gif|jpe?g|jfif|tiff?|png|webp|bmp)$/i;
-        let query = "INSERT INTO posts (authorid, title, content, price, createddate";
+        let query =
+          "INSERT INTO posts (authorid, title, content, price, createddate";
         if (req.file && imageRegEx.test(req.file.filename)) {
           postdetails.push(req.file.path.replace(/\\/g, "/"));
-          query+=",image) VALUES (?,?,?,?,?,?)";
+          query += ",image) VALUES (?,?,?,?,?,?)";
+        } else {
+          query += ") VALUES (?,?,?,?,?)";
         }
-        else { 
-          query +=") VALUES (?,?,?,?,?)";
-        }
-        await queryDb(
-          query,
-          postdetails
-        );
+        await queryDb(query, postdetails);
 
         let categories = [];
         if (req.body.categories) {
@@ -67,27 +75,14 @@ exports.create_post = [
                 "SELECT id from categories where name = ?",
                 cat
               );
-              return result[0].id;
+              const r = result[0];
+              return r.id;
             })
           );
-          const year = createdDate.getFullYear();
-          const month = `${createdDate.getMonth() + 1}`.padStart(2, "0");
-          const day = `${createdDate.getDate()}`.padStart(2, "0");
-
-          // get the hours, minutes, and seconds as separate strings
-          const hours = `${createdDate.getHours()}`.padStart(2, "0");
-          const minutes = `${createdDate.getMinutes()}`.padStart(2, "0");
-          const seconds = `${createdDate.getSeconds()}`.padStart(2, "0");
-
-          // combine the createdDate and time strings into a single string in the desired format
-          const dateTimeString = `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
-
           const post = await queryDb(
             "SELECT * FROM posts WHERE title = ? AND authorid = ? AND createddate LIKE ?",
             [req.body.title, req.user, dateTimeString]
           );
-          console.log(categories);
-
           categories.forEach(async (e) => {
             await queryDb(
               "INSERT INTO post_categories (postid, categoryid) VALUES (?, ?)",
@@ -95,7 +90,7 @@ exports.create_post = [
             );
           });
         }
-        console.log(categories);
+
         res.status(200).json({
           msg: "تم انشاء منشور بنجاح",
         });
@@ -191,51 +186,48 @@ exports.add_like = [
   }),
   async (req, res, next) => {
     try {
-      const post = await queryDb('SELECT  * FROM posts WHERE id = ? AND authorid = ?', [
-        req.body.postid,
-        req.user,
-      ]);
-      if(post.length > 0 ) { 
-        
+      const post = await queryDb(
+        "SELECT  * FROM posts WHERE id = ? AND authorid = ?",
+        [req.body.postid, req.user]
+      );
+      if (post.length > 0) {
         const result = await queryDb(
           "SELECT * FROM post_likes WHERE user_id = ? AND post_id = ?",
           [req.user, +req.body.postid]
+        );
+        if (result.length > 0) {
+          await queryDb(
+            "DELETE FROM post_likes WHERE user_id = ? AND post_id = ?",
+            [req.user, +req.body.postid]
           );
-          console.log(result);
-          if (result.length > 0) {
-            await queryDb(
-              "DELETE FROM post_likes WHERE user_id = ? AND post_id = ?",
-              [req.user, +req.body.postid]
-              );
-              await queryDb(
-                "UPDATE posts SET likes_count = likes_count -1 WHERE authorid = ? AND id = ?",
-                [req.user, +req.body.postid]
-                );
-                return res.status(200).json({
-                  msg: "تم الغاء الاعجاب بالمنشور بنجاح",
-                });
-              } else {
-                await queryDb("INSERT INTO post_likes (user_id, post_id) VALUES(?,?)", [
-                  req.user,
-                  +req.body.postid,
-                ]);
-                await queryDb(
-                  "UPDATE posts SET likes_count = likes_count + 1 WHERE authorid = ? AND id = ?",
-                  [req.user, +req.body.postid]
-                  );
-                  return res.status(200).json({
-                    msg: "تم الاعجاب بالمنشور بنجاح",
-                  });
-                }
-              }
-              else { 
-                res.status(404).json('لم يتم العثور على المنشور المطلوب');
-              }
-              } catch (err) {
-                console.error(err);
-                next(err);
-              }
-            },
+          await queryDb(
+            "UPDATE posts SET likes_count = likes_count -1 WHERE authorid = ? AND id = ?",
+            [req.user, +req.body.postid]
+          );
+          return res.status(200).json({
+            msg: "تم الغاء الاعجاب بالمنشور بنجاح",
+          });
+        } else {
+          await queryDb(
+            "INSERT INTO post_likes (user_id, post_id) VALUES(?,?)",
+            [req.user, +req.body.postid]
+          );
+          await queryDb(
+            "UPDATE posts SET likes_count = likes_count + 1 WHERE authorid = ? AND id = ?",
+            [req.user, +req.body.postid]
+          );
+          return res.status(200).json({
+            msg: "تم الاعجاب بالمنشور بنجاح",
+          });
+        }
+      } else {
+        res.status(404).json("لم يتم العثور على المنشور المطلوب");
+      }
+    } catch (err) {
+      console.error(err);
+      next(err);
+    }
+  },
 ];
 
 exports.get_posts = [
@@ -311,33 +303,31 @@ exports.delete_post = [
   passport.authenticate("jwt", { session: false }),
   body("postid").escape(),
   async (req, res, next) => {
-    try { 
-    if (req.body.postid) {
+    try {
+      if (req.body.postid) {
         const post = await queryDb(
           "SELECT * FROM posts WHERE id = ? AND authorid = ?",
-        [req.body.postid, req.user]
-      );
-      if (post.length > 0) {
-        await queryDb("DELETE FROM posts WHERE id = ? AND authorid = ?", [
-          req.body.postid,
-          req.user,
-        ]);
-        return res.status(200).json({
-          msg: 'تم حذف المنشور بنجاح',
+          [req.body.postid, req.user]
+        );
+        if (post.length > 0) {
+          await queryDb("DELETE FROM posts WHERE id = ? AND authorid = ?", [
+            req.body.postid,
+            req.user,
+          ]);
+          return res.status(200).json({
+            msg: "تم حذف المنشور بنجاح",
+          });
+        } else {
+          return res.status(404).json({
+            msg: "المنشور غير موجود ",
+          });
+        }
+      } else {
+        return res.status(400).json({
+          msg: "معرف المنشور غير موجود",
         });
       }
-      else { 
-        return res.status(404).json({
-          msg: 'المنشور غير موجود ',
-        })
-      }
-    } else {
-      return res.status(400).json({
-        msg: "معرف المنشور غير موجود",
-      });
-    }
-  }
-    catch(err){ 
+    } catch (err) {
       console.log(err);
       next(err);
     }
