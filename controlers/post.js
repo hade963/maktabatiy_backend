@@ -191,41 +191,51 @@ exports.add_like = [
   }),
   async (req, res, next) => {
     try {
-      const result = await queryDb(
-        "SELECT * FROM post_likes WHERE user_id = ? AND post_id = ?",
-        [req.user, +req.body.postid]
-      );
-      console.log(result);
-      if (result.length > 0) {
-        await queryDb(
-          "DELETE FROM post_likes WHERE user_id = ? AND post_id = ?",
+      const post = await queryDb('SELECT  * FROM posts WHERE id = ? AND authorid = ?', [
+        req.body.postid,
+        req.user,
+      ]);
+      if(post.length > 0 ) { 
+        
+        const result = await queryDb(
+          "SELECT * FROM post_likes WHERE user_id = ? AND post_id = ?",
           [req.user, +req.body.postid]
-        );
-        await queryDb(
-          "UPDATE posts SET likes_count = likes_count -1 WHERE authorid = ? AND id = ?",
-          [req.user, +req.body.postid]
-        );
-        return res.status(200).json({
-          msg: "تم الغاء الاعجاب بالمنشور بنجاح",
-        });
-      } else {
-        await queryDb("INSERT INTO post_likes (user_id, post_id) VALUES(?,?)", [
-          req.user,
-          +req.body.postid,
-        ]);
-        await queryDb(
-          "UPDATE posts SET likes_count = likes_count + 1 WHERE authorid = ? AND id = ?",
-          [req.user, +req.body.postid]
-        );
-        return res.status(200).json({
-          msg: "تم الاعجاب بالمنشور بنجاح",
-        });
-      }
-    } catch (err) {
-      console.error(err);
-      next(err);
-    }
-  },
+          );
+          console.log(result);
+          if (result.length > 0) {
+            await queryDb(
+              "DELETE FROM post_likes WHERE user_id = ? AND post_id = ?",
+              [req.user, +req.body.postid]
+              );
+              await queryDb(
+                "UPDATE posts SET likes_count = likes_count -1 WHERE authorid = ? AND id = ?",
+                [req.user, +req.body.postid]
+                );
+                return res.status(200).json({
+                  msg: "تم الغاء الاعجاب بالمنشور بنجاح",
+                });
+              } else {
+                await queryDb("INSERT INTO post_likes (user_id, post_id) VALUES(?,?)", [
+                  req.user,
+                  +req.body.postid,
+                ]);
+                await queryDb(
+                  "UPDATE posts SET likes_count = likes_count + 1 WHERE authorid = ? AND id = ?",
+                  [req.user, +req.body.postid]
+                  );
+                  return res.status(200).json({
+                    msg: "تم الاعجاب بالمنشور بنجاح",
+                  });
+                }
+              }
+              else { 
+                res.status(404).json('لم يتم العثور على المنشور المطلوب');
+              }
+              } catch (err) {
+                console.error(err);
+                next(err);
+              }
+            },
 ];
 
 exports.get_posts = [
