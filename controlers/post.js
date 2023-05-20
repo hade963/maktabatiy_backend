@@ -288,9 +288,9 @@ exports.get_post = [
       p.likes_count, p.createddate, CONCAT(u.firstname, ' ', u.lastname) AS authorname, 
       u.phonenumber, u.photo FROM posts AS p
       INNER JOIN users AS  u ON p.authorid = u.id
-      WHERE p.id = 56;`;
+      WHERE p.id = ?;`;
 
-      const post = await queryDb(query);
+      const post = await queryDb(query, req.query.postid);
       if (post.length > 0) {
         res.status(200).json({
           post: post,
