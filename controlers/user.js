@@ -299,7 +299,6 @@ exports.get_cart_items = [
       INNER JOIN posts As p ON c.postid = p.id WHERE c.userid = ?;`;
 
       const itemsInCart = await queryDb(query, [req.user]);
-      console.log(itemsInCart);
       if (itemsInCart.length > 0) {
         return res.status(200).json({
           items: itemsInCart,

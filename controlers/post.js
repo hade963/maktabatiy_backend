@@ -254,7 +254,6 @@ exports.get_posts = [
       ORDER BY p.createddate DESC
       LIMIT 10 OFFSET ${req.query.page > 0 ? req.query.page * 10 : 0};`;
       const posts = await queryDb(query);
-      console.log(req.params.page);
       if (posts.length > 0) {
         return res.status(200).json({
           posts: posts,
@@ -312,9 +311,10 @@ exports.delete_post = [
   passport.authenticate("jwt", { session: false }),
   body("postid").escape(),
   async (req, res, next) => {
+    try { 
     if (req.body.postid) {
-      const post = await queryDb(
-        "SELECT * FROM posts WHERE id = ? AND authorid = ?",
+        const post = await queryDb(
+          "SELECT * FROM posts WHERE id = ? AND authorid = ?",
         [req.body.postid, req.user]
       );
       if (post.length > 0) {
@@ -335,6 +335,11 @@ exports.delete_post = [
       return res.status(400).json({
         msg: "معرف المنشور غير موجود",
       });
+    }
+  }
+    catch(err){ 
+      console.log(err);
+      next(err);
     }
   },
 ];
