@@ -4,7 +4,6 @@ const multer = require("multer");
 const { query, body, validationResult } = require("express-validator");
 const path = require('path');
 const { queryDb } = require("../utils");
-const { rmSync } = require("fs");
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     cb(null, "uploads/");
@@ -47,11 +46,16 @@ exports.create_post = [
           createdDate,
         ];
         const imageRegEx = /\.(gif|jpe?g|jfif|tiff?|png|webp|bmp)$/i;
+        let query = "INSERT INTO posts (authorid, title, content, price, createddate";
         if (req.file && imageRegEx.test(req.file.filename)) {
           postdetails.push(req.file.path.replace(/\\/g, "/"));
+          query+=",image) VALUES (?,?,?,?,?,?)";
+        }
+        else { 
+          query +=") VALUES (?,?,?,?,?)";
         }
         await queryDb(
-          "INSERT INTO posts (authorid, title, content, price, createddate, image) VALUES(?,?,?,?,?,?)",
+          query,
           postdetails
         );
 
