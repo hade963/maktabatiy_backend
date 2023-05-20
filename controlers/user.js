@@ -6,11 +6,9 @@ const jwt = require("jsonwebtoken");
 const { queryDb } = require("../utils");
 const multer = require("multer");
 const path = require("path");
+const S3FS = require("@cyclic.sh/s3fs");
 
 const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, "uploads/");
-  },
   filename: (req, file, cb) => {
     cb(null, Date.now() + path.extname(file.originalname));
   },
@@ -356,6 +354,14 @@ exports.add_profile_photo = [
     const imageRegEx = /\.(gif|jpe?g|jfif|tiff?|png|webp|bmp)$/i;
 
     if (req.file && imageRegEx.test(req.file.filename)) {
+
+      fs.writeFile(req.file.filename, req.file.buffer, function(err) {
+        if (err) {
+          console.error(err);
+          return res.status(500).send('حدث خطأ أثناء رفع الملف الرجاء المحاولة لاحقا');
+        }
+      });
+
       try {
         const query = "UPDATE users SET photo = ? WHERE id = ?";
         await queryDb(query, [req.file.path.replace(/\\/g, "/"), req.user]);
@@ -366,6 +372,7 @@ exports.add_profile_photo = [
         console.log(err);
         next(err);
       }
+
     } else {
       return res.status(400).json({
         msg: "الملف المرسل غير صالح الرجاء المحاولة من جديد",

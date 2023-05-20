@@ -4,10 +4,9 @@ const multer = require("multer");
 const { query, body, validationResult } = require("express-validator");
 const path = require("path");
 const { queryDb } = require("../utils");
+const S3FS = require("@cyclic.sh/s3fs");
+
 const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, "uploads/");
-  },
   filename: (req, file, cb) => {
     cb(null, Date.now() + path.extname(file.originalname));
   },
@@ -31,12 +30,14 @@ exports.create_post = [
   upload.single("image"),
   async (req, res, next) => {
     try {
+
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
         res.status(400).json({
           errors,
         });
       } else {
+        
         const createdDate = new Date();
         const year = createdDate.getFullYear();
         const month = `${createdDate.getMonth() + 1}`.padStart(2, "0");
@@ -62,6 +63,12 @@ exports.create_post = [
         if (req.file && imageRegEx.test(req.file.filename)) {
           postdetails.push(req.file.path.replace(/\\/g, "/"));
           query += ",image) VALUES (?,?,?,?,?,?)";
+          fs.writeFile(req.file.filename, req.file.buffer, function(err) {
+            if (err) {
+              console.error(err);
+              return res.status(500).send('Error uploading file');
+            }
+          });
         } else {
           query += ") VALUES (?,?,?,?,?)";
         }
@@ -153,6 +160,12 @@ exports.edit_post = [
     if (req.file && imageRegEx.test(req.file.filename)) {
       postdetails.push(req.file.path.replace(/\\/g, "/"));
       query += ", image = ?";
+      fs.writeFile(req.file.filename, req.file.buffer, function(err) {
+        if (err) {
+          console.error(err);
+          return res.status(500).send('Error uploading file');
+        }
+      });
     }
     postdetails.push(new Date());
     postdetails.push(req.body.postid);
