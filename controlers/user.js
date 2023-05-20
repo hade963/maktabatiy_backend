@@ -225,8 +225,12 @@ exports.add_to_cart = [
         errors: errors.array(),
       });
     }
-    try {
-      const item = await queryDb(
+    const post = await queryDb('SELECT * FROM posts WHERE id = ? ', req.body.postid);
+    if(post.length > 0) { 
+
+      
+      try {
+        const item = await queryDb(
         "SELECT * FROM cart WHERE postid = ? AND userid = ?",
         [req.body.postid, req.user]
       );
@@ -246,13 +250,19 @@ exports.add_to_cart = [
       console.log(err);
       next(err);
     }
+  }
+  else { 
+    return res.status(404).json({
+      msg: "لم يتم العثور على المنشور المطلوب",
+    })
+  }
   },
 ];
 
 exports.remove_from_cart = [
   passport.authenticate("jwt", { session: false }),
   body("postid")
-    .escape()
+  .escape()
     .custom((value) => {
       return value ? true : false;
     })
