@@ -6,7 +6,7 @@ const jwt = require("jsonwebtoken");
 const { queryDb } = require("../utils");
 const multer = require("multer");
 const path = require("path");
-const S3FS = require("@cyclic.sh/s3fs");
+const fs = require("@cyclic.sh/s3fs");
 
 const storage = multer.diskStorage({
   filename: (req, file, cb) => {

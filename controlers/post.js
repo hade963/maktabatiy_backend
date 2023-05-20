@@ -4,7 +4,7 @@ const multer = require("multer");
 const { query, body, validationResult } = require("express-validator");
 const path = require("path");
 const { queryDb } = require("../utils");
-const S3FS = require("@cyclic.sh/s3fs");
+const fs = require("@cyclic.sh/s3fs");
 
 const storage = multer.diskStorage({
   filename: (req, file, cb) => {
