@@ -27,7 +27,7 @@ app.use(passport.session());
 app.get("/", (req, res) => {
   res.send("<h1> hello world! </h1>");
 });
-app.use('/images',express.static('tmp'));
+app.use('/images',express.static('./tmp'));
 const userRouter = require("./routes/users");
 const postRouter = require("./routes/posts");
 app.use("/user", userRouter);

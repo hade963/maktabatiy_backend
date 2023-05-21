@@ -63,10 +63,12 @@ exports.create_post = [
         if (req.file && imageRegEx.test(req.file.filename)) {
           postdetails.push(req.file.path.replace(/\\/g, "/"));
           query += ",image) VALUES (?,?,?,?,?,?)";
-          fs.writeFile(req.file.filename, req.file.buffer, function(err) {
+          fs.writeFile(req.file.filename, req.file.buffer, function (err) {
             if (err) {
               console.error(err);
-              return res.status(500).send('Error uploading file');
+              return res
+                .status(500)
+                .send("حدث خطأ أثناء رفع الملف الرجاء المحاولة لاحقا");
             }
           });
         } else {
@@ -160,10 +162,12 @@ exports.edit_post = [
     if (req.file && imageRegEx.test(req.file.filename)) {
       postdetails.push(req.file.path.replace(/\\/g, "/"));
       query += ", image = ?";
-      fs.writeFile(req.file.filename, req.file.buffer, function(err) {
+      fs.writeFile(req.file.filename, req.file.buffer, function (err) {
         if (err) {
           console.error(err);
-          return res.status(500).send('Error uploading file');
+          return res
+            .status(500)
+            .send("حدث خطأ أثناء رفع الملف الرجاء المحاولة لاحقا");
         }
       });
     }

@@ -328,7 +328,7 @@ exports.get_profile = [
     try {
       const user = await queryDb(
         "SELECT firstname, lastname, username, email, phoneNumber, photo from users WHERE id = ?",
-       [req.user]
+        [req.user]
       );
 
       if (user.length > 0) {
@@ -422,9 +422,7 @@ exports.edit_user_profile = [
       }
       return true;
     }),
-  body("phonenumber")
-    .escape()
-    .trim(),
+  body("phonenumber").escape().trim(),
   body("username")
     .custom(async (value) => {
       const result = await queryDb(
@@ -509,7 +507,10 @@ exports.change_user_password = [
     }
     try {
       const hash = bcrypt.hashSync(req.body.password);
-      await queryDb("UPDATE users SET password = ? WHERE id = ?", [req.body.password,req.user]);
+      await queryDb("UPDATE users SET password = ? WHERE id = ?", [
+        req.body.password,
+        req.user,
+      ]);
       res.status(200).json({
         msg: "تم تغير كلمة السر بنجاح",
       });
