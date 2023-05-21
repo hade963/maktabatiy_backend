@@ -30,14 +30,12 @@ exports.create_post = [
   upload.single("image"),
   async (req, res, next) => {
     try {
-
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
         res.status(400).json({
           errors,
         });
       } else {
-        
         const createdDate = new Date();
         const year = createdDate.getFullYear();
         const month = `${createdDate.getMonth() + 1}`.padStart(2, "0");
@@ -350,19 +348,17 @@ exports.delete_post = [
   },
 ];
 
-
 exports.get_categories = [
-  passport.authenticate('jwt', {session: false}),
-  async (req, res, next) => { 
-    try{  
-      const categoires = await queryDb('SELECT * FROM categories ');
+  passport.authenticate("jwt", { session: false }),
+  async (req, res, next) => {
+    try {
+      const categoires = await queryDb("SELECT * FROM categories ");
       return res.status(200).json({
         categoires: categoires,
       });
-    }
-    catch(err) { 
+    } catch (err) {
       console.log(err);
       next(err);
     }
-  }
-]
+  },
+];
