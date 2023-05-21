@@ -19,7 +19,7 @@ const options = {
 
 
 passport.use(new JWTSTRATIGE(options, function(jwt_payload, done) { 
-    const user = db.query('SELECT * FROM users WHERE username=? AND id = ?', [jwt_payload.username, jwt_payload.id],function(e, r) {
+    const user = db.query('SELECT * FROM users WHERE  id = ?', [jwt_payload.id],function(e, r) {
       if(e) { 
         done(e, null, "" ,{message: "اسم المستخدم غير موجود"} );
       }

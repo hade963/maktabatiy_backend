@@ -287,7 +287,6 @@ exports.get_post = [
       if (!result.isEmpty()) {
         return res.send({ errors: result.array() });
       }
-
       const query = `
       SELECT  p.title, p.content, p.price, p.image,
       p.likes_count, p.createddate, CONCAT(u.firstname, ' ', u.lastname) AS authorname, 
@@ -346,3 +345,20 @@ exports.delete_post = [
     }
   },
 ];
+
+
+exports.get_categories = [
+  passport.authenticate('jwt', {session: false}),
+  async (req, res, next) => { 
+    try{  
+      const categoires = await queryDb('SELECT * FROM categories ');
+      return res.status(200).json({
+        categoires: categoires,
+      });
+    }
+    catch(err) { 
+      console.log(err);
+      next(err);
+    }
+  }
+]
