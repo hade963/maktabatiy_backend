@@ -143,6 +143,7 @@ exports.user_login = [
     }),
   body("password").escape().trim(),
   async (req, res, next) => {
+    console.log(req.headers);
     if (req.session.token) {
       return res.status(400).json({
         msg: "تم تسجيل الدخول بالفعل",
