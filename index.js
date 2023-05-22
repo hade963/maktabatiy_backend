@@ -17,7 +17,7 @@ const sessionStore = new MySqlStore({}, db);
 app.use(
   session({
     secret: process.env.SECRET || "adjfadjfq@#$!#$%@$",
-    cookie: { httpOnly: true, maxAge: 24 * 60 * 60 * 1000 },
+    cookie: { httpOnly: true, maxAge: 24 * 60 * 60 * 1000, sameSite: 'none' },
     resave: false,
     store: sessionStore,
     saveUninitialized: true,
