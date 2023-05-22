@@ -10,7 +10,7 @@ const cors = require("cors");
 require("dotenv").config();
 require("./passport");
 
-app.use(cors());
+app.use(cors({ origin: "http://127.0.0.1:3000", credentials: true }));
 app.use(helmet());
 app.use(bodyParser.json());
 const sessionStore = new MySqlStore({}, db);
