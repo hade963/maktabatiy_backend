@@ -5,16 +5,8 @@ require('dotenv').config();
 const db = require('./db');
 
 const options = {
-  jwtFromRequest: ExtractJWT.fromExtractors([
-  function ExtractFromSession(req) { 
-    let token = null;
-    if(req && req.session) { 
-      token = req.session.token;
-    }
-    return token;
-  }
-  ]),
-  secretOrKey: process.env.SECRET || 'adjfadjfq@#$!#$%@$',
+  jwtFromRequest:  ExtractJWT.fromAuthHeaderAsBearerToken(),
+  secretOrKey: process.env.SECRET ,
 }
 
 

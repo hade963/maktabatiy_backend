@@ -1,8 +1,6 @@
 const express = require("express");
-const session = require("express-session");
 const app = express();
 const passport = require("passport");
-const MySqlStore = require("express-mysql-session")(session);
 const bodyParser = require("body-parser");
 const helmet = require("helmet");
 const db = require("./db");
@@ -13,18 +11,7 @@ require("./passport");
 app.use(cors({ origin: ["http://127.0.0.1:3000", "http://127.0.0.1:5500"], credentials: true }));
 app.use(helmet());
 app.use(bodyParser.json());
-const sessionStore = new MySqlStore({}, db);
-app.use(
-  session({
-    secret: process.env.SECRET || "adjfadjfq@#$!#$%@$",
-    cookie: { httpOnly: true, maxAge: 24 * 60 * 60 * 1000, sameSite: 'none', secure: true},
-    resave: false,
-    store: sessionStore,
-    saveUninitialized: true,
-  })
-);
 app.use(passport.initialize());
-app.use(passport.session());
 
 app.get("/", (req, res) => {
   res.send("<h1> hello world! </h1>");

@@ -143,8 +143,8 @@ exports.user_login = [
     }),
   body("password").escape().trim(),
   async (req, res, next) => {
-    console.log(req.headers);
-    if (req.session.token) {
+    if (req.headers.Authorization) {
+      console.log(req.headers.Authorization);
       return res.status(400).json({
         msg: "تم تسجيل الدخول بالفعل",
       });
@@ -171,9 +171,9 @@ exports.user_login = [
           process.env.SECRET,
           { expiresIn: "1d" }
         );
-        req.session.token = token;
         return res.status(200).json({
           msg: "تم تسجيل الدخول ",
+          token: token,
         });
       } else {
         return res.status(400).json({
