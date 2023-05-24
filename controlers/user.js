@@ -147,11 +147,19 @@ exports.user_login = [
   body("password").escape().trim(),
   async (req, res, next) => {
     if(req.headers.authorization) { 
-      const decoded = jwt.verify(req.headers.authorization.split('Bearer ').join(''), process.env.SECRET);
-      const user = await queryDb('SELECT * FROM users WHERE id = ?', decoded.id);
-      if (user.length > 0) {
+      let decoded;
+      try {
+        decoded = jwt.verify(req.headers.authorization.split('Bearer ').join(''), process.env.SECRET);
+        const user = await queryDb('SELECT * FROM users WHERE id = ?', decoded.id);
+        if (user.length > 0) {
+          return res.status(400).json({
+            msg: "تم تسجيل الدخول بالفعل",
+          });
+        }
+      }
+      catch(err) { 
         return res.status(400).json({
-          msg: "تم تسجيل الدخول بالفعل",
+          msg: 'حدث خطاء انثاء التسجيل  المعلومات غير صحيحة',
         });
       }
     }
