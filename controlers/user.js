@@ -127,6 +127,7 @@ exports.user_signup = [
   },
 ];
 
+
 exports.user_login = [
   body("username")
     .trim()
@@ -143,8 +144,8 @@ exports.user_login = [
     }),
   body("password").escape().trim(),
   async (req, res, next) => {
-    if (req.headers.Authorization) {
-      console.log(req.headers.Authorization);
+    
+    if (req.headers.authorization) {
       return res.status(400).json({
         msg: "تم تسجيل الدخول بالفعل",
       });
