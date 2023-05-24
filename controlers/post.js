@@ -261,7 +261,6 @@ exports.add_like = [
 
 exports.get_posts = [
   passport.authenticate("jwt", { session: false }),
-  query("page").escape(),
   async (req, res, next) => {
     try {
       const query = `
