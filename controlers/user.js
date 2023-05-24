@@ -193,21 +193,6 @@ exports.user_login = [
   },
 ];
 
-exports.user_logout = [
-  passport.authenticate("jwt", { session: false }),
-  (req, res, next) => {
-    try {
-      req.session.destroy();
-      return res.status(200).json({
-        msg: "تم تسجيل الخروج",
-      });
-    } catch (err) {
-      console.error(err);
-      next(err);
-    }
-  },
-];
-
 exports.add_to_cart = [
   passport.authenticate("jwt", { session: false }),
   body("postid")
