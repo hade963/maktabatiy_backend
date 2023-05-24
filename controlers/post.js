@@ -111,8 +111,7 @@ exports.create_post = [
 
 exports.edit_post = [
   passport.authenticate("jwt", { session: false }),
-  body("postid")
-    .escape(),
+  body("postid").escape(),
   body("title").escape(),
   body("content").escape(),
   body("price").escape(),
@@ -120,14 +119,16 @@ exports.edit_post = [
   async (req, res, next) => {
     const errors = validationResult(req);
 
-    if(!errors.isEmpty()) { 
-      return res.status(400).json({ 
-        errors: errors.array()
+    if (!errors.isEmpty()) {
+      return res.status(400).json({
+        errors: errors.array(),
       });
     }
-    const post = await queryDb("SELECT * FROM posts WHERE id = ? And authorid = ?", [req.body.postid, req.user]);
-    if(post.length > 0 ) { 
-
+    const post = await queryDb(
+      "SELECT * FROM posts WHERE id = ? And authorid = ?",
+      [req.body.postid, req.user]
+    );
+    if (post.length > 0) {
       const postdetails = [];
       let query = `UPDATE posts SET `;
       if (req.body.title) {
@@ -138,70 +139,69 @@ exports.edit_post = [
         postdetails.push(req.body.content);
         query += ` content = ?,`;
       }
-    if (req.body.price) {
-      postdetails.push(+req.body.price);
-      query += ` price = ?,`;
-    }
-    let categories = [];
-    if (req.body.categories) {
-      categories = await Promise.all(
-        req.body.categories.split(",").map(async (cat) => {
-          const result = await queryDb(
-            "SELECT id from categories where name LIKE ?",
-            `${cat}`
+      if (req.body.price) {
+        postdetails.push(+req.body.price);
+        query += ` price = ?,`;
+      }
+      let categories = [];
+      if (req.body.categories) {
+        categories = await Promise.all(
+          req.body.categories.split(",").map(async (cat) => {
+            const result = await queryDb(
+              "SELECT id from categories where name LIKE ?",
+              `${cat}`
             );
             return result[0].id;
           })
-          );
+        );
+        await queryDb(
+          "DELETE FROM post_categories WHERE postid = ?",
+          req.body.postid
+        );
+        categories.forEach(async (cat) => {
           await queryDb(
-            "DELETE FROM post_categories WHERE postid = ?",
-            req.body.postid
-            );
-            categories.forEach(async (cat) => {
-              await queryDb(
-                "INSERT INTO post_categories (postid, categoryid) VALUES (?, ?)",
-                [req.body.postid, cat]
-                );
-              });
-            }
-            const imageRegEx = /\.(gif|jpe?g|jfif|tiff?|png|webp|bmp)$/i;
-            if (req.file && imageRegEx.test(req.file.filename)) {
-              postdetails.push(req.file.path.replace(/\\/g, "/"));
-              query += " image = ?,";
-              fs.writeFile(req.file.filename, req.file.buffer, function (err) {
-                if (err) {
-                  console.error(err);
-                  return res
-                    .status(500)
-                    .send("حدث خطأ أثناء رفع الملف الرجاء المحاولة لاحقا");
-                }
-              });
-            }
-            postdetails.push(new Date());
-            postdetails.push(req.body.postid);
-            postdetails.push(req.user);
-            query += " createddate = ? WHERE id = ? and authorid = ? ";
-            try {
-              const post = await queryDb(
-                "SELECT authorid FROM posts WHERE id = ? ",
-                req.body.postid
-                );
-                await queryDb(query, postdetails);
-                return res.status(200).json({
-                  msg: "تم تحديث المنشور بنجاح",
-                });
-              } catch (err) {
-                console.error(err);
-                next(err);
-              }
-            } 
-              else { 
-                return res.status(404).json({
-                  msg: 'عذرا لم يتم العثور على المنشور',
-                })
-              }
-            },
-          ];
+            "INSERT INTO post_categories (postid, categoryid) VALUES (?, ?)",
+            [req.body.postid, cat]
+          );
+        });
+      }
+      const imageRegEx = /\.(gif|jpe?g|jfif|tiff?|png|webp|bmp)$/i;
+      if (req.file && imageRegEx.test(req.file.filename)) {
+        postdetails.push(req.file.path.replace(/\\/g, "/"));
+        query += " image = ?,";
+        fs.writeFile(req.file.filename, req.file.buffer, function (err) {
+          if (err) {
+            console.error(err);
+            return res
+              .status(500)
+              .send("حدث خطأ أثناء رفع الملف الرجاء المحاولة لاحقا");
+          }
+        });
+      }
+      postdetails.push(new Date());
+      postdetails.push(req.body.postid);
+      postdetails.push(req.user);
+      query += " createddate = ? WHERE id = ? and authorid = ? ";
+      try {
+        const post = await queryDb(
+          "SELECT authorid FROM posts WHERE id = ? ",
+          req.body.postid
+        );
+        await queryDb(query, postdetails);
+        return res.status(200).json({
+          msg: "تم تحديث المنشور بنجاح",
+        });
+      } catch (err) {
+        console.error(err);
+        next(err);
+      }
+    } else {
+      return res.status(404).json({
+        msg: "عذرا لم يتم العثور على المنشور",
+      });
+    }
+  },
+];
 
 exports.add_like = [
   passport.authenticate("jwt", { session: false }),
@@ -392,6 +392,28 @@ exports.get_categories = [
       return res.status(200).json({
         categoires: categoires,
       });
+    } catch (err) {
+      console.log(err);
+      next(err);
+    }
+  },
+];
+
+exports.get_post_image = [
+  passport.authenticate("jwt", { session: false }),
+  async (req, res, next) => {
+    try {
+      const post = await queryDb(
+        "SELECT * FROM posts WHERE id = ? ",
+        req.body.postid
+      );
+      if (post.length > 0 && post.image ) {
+        return res.sendfile(post.image);
+      } else {
+        return res.status(404).json({
+          msg: "لم يتم العثور على المنشور",
+        });
+      }
     } catch (err) {
       console.log(err);
       next(err);

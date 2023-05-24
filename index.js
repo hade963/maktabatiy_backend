@@ -16,9 +16,9 @@ app.use(passport.initialize());
 app.get("/", (req, res) => {
   res.send("<h1> hello world! </h1>");
 });
-app.use("/images", express.static("./tmp"));
 const userRouter = require("./routes/users");
 const postRouter = require("./routes/posts");
+const { queryDb } = require("./utils");
 app.use("/user", userRouter);
 app.use("/posts", postRouter);
 
@@ -35,3 +35,4 @@ app.use((err, req, res, next) => {
     msg: "حصل خطاء في السيرفر",
   });
 });
+
