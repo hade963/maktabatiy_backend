@@ -112,9 +112,7 @@ exports.create_post = [
 exports.edit_post = [
   passport.authenticate("jwt", { session: false }),
   body("postid")
-    .escape()
-    .isNumeric()
-    .withMessage("معرف المنشور يجب أن يكون رقم"),
+    .escape(),
   body("title").escape(),
   body("content").escape(),
   body("price").isNumeric(),
