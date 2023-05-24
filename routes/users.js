@@ -13,5 +13,5 @@ router.get('/', user_controler.get_profile);
 router.put('/', user_controler.edit_user_profile);
 router.put('/password',  user_controler.change_user_password);
 router.delete('/', user_controler.delete_user);
-router.get('/image');
+router.get('/photo', user_controler.get_user_photo);
 module.exports = router;

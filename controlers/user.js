@@ -7,6 +7,7 @@ const { queryDb } = require("../utils");
 const multer = require("multer");
 const path = require("path");
 const fs = require("@cyclic.sh/s3fs");
+const { query } = require("express");
 
 const storage = multer.diskStorage({
   filename: (req, file, cb) => {
@@ -522,3 +523,25 @@ exports.change_user_password = [
     }
   },
 ];
+
+exports.get_user_photo = [
+  passport.authenticate('jwt', {session: false}),
+  async (req, res, next) => { 
+    try { 
+      const user = await queryDb('SElECT * FROM users WHERE id = ? ', req.user);
+      if(user.length > 0 && user.photo) { 
+        return res.sendFile(user.photo);
+      }
+      else { 
+        return res.status(404).json({
+          msg: 'لم يتم العثور على اي صور للمستخدم',
+        });
+      }
+
+    }
+    catch(err) { 
+      console.log(err);
+      next(err);
+    }
+  }
+]
