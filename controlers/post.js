@@ -132,15 +132,15 @@ exports.edit_post = [
       let query = `UPDATE posts SET `;
       if (req.body.title) {
         postdetails.push(req.body.title);
-        query += ` title = ?`;
+        query += ` title = ? ,`;
       }
       if (req.body.content) {
         postdetails.push(req.body.content);
-        query += `, content = ?`;
+        query += ` content = ?,`;
       }
     if (req.body.price) {
       postdetails.push(+req.body.price);
-      query += `, price = ?`;
+      query += ` price = ?,`;
     }
     let categories = [];
     if (req.body.categories) {
@@ -167,20 +167,20 @@ exports.edit_post = [
             const imageRegEx = /\.(gif|jpe?g|jfif|tiff?|png|webp|bmp)$/i;
             if (req.file && imageRegEx.test(req.file.filename)) {
               postdetails.push(req.file.path.replace(/\\/g, "/"));
-              query += ", image = ?";
+              query += " image = ?,";
               fs.writeFile(req.file.filename, req.file.buffer, function (err) {
                 if (err) {
                   console.error(err);
                   return res
-                  .status(500)
-                  .send("حدث خطأ أثناء رفع الملف الرجاء المحاولة لاحقا");
+                    .status(500)
+                    .send("حدث خطأ أثناء رفع الملف الرجاء المحاولة لاحقا");
                 }
               });
             }
             postdetails.push(new Date());
             postdetails.push(req.body.postid);
             postdetails.push(req.user);
-            query += ", createddate = ? WHERE id = ? and authorid = ? ";
+            query += " createddate = ? WHERE id = ? and authorid = ? ";
             try {
               const post = await queryDb(
                 "SELECT authorid FROM posts WHERE id = ? ",
