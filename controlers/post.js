@@ -266,7 +266,7 @@ exports.get_posts = [
       INNER JOIN post_categories AS pc ON pc.postid = p.id 
       INNER JOIN categories AS c ON c.id = pc.categoryid
       INNER JOIN post_likes AS pl ON pl.post_id = p.id
-      GROUP BY p.id;
+      GROUP BY p.id
       ORDER BY p.createddate DESC;`;
 
       const posts = await queryDb(query);
