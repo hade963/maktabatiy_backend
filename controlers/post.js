@@ -250,16 +250,24 @@ exports.get_posts = [
   query("page").escape(),
   async (req, res, next) => {
     try {
-      const query = `SELECT p.id AS postid, p.title, p.content, p.likes_count,
-      p.price, p.createddate, p.image, p.likes_count, CONCAT(u.firstname, ' ', u.lastname) AS authorname,
+      const query = `
+      SELECT 
+      p.id AS postid, 
+      p.title, 
+      p.content, 
+      p.likes_count,
+      p.price, 
+      p.createddate, 
+      p.image,
+      IF(pc.postid = p.id, true, false) AS isLiked,          
       GROUP_CONCAT(DISTINCT c.name ORDER BY c.name ASC SEPARATOR ',') AS categories
       FROM posts AS p
       INNER JOIN users AS u ON p.authorid = u.id
-      INNER JOIN post_categories AS pc ON pc.postid = p.id
+      INNER JOIN post_categories AS pc ON pc.postid = p.id 
       INNER JOIN categories AS c ON c.id = pc.categoryid
-      GROUP BY p.id
-      ORDER BY p.createddate DESC
-      LIMIT 10 OFFSET ${req.query.page > 0 ? req.query.page * 10 : 0};`;
+      GROUP BY p.id 
+      ORDER BY p.createddate DESC;`;
+
       const posts = await queryDb(query);
       if (posts.length > 0) {
         return res.status(200).json({
@@ -290,11 +298,23 @@ exports.get_post = [
         return res.send({ errors: result.array() });
       }
       const query = `
-      SELECT  p.title, p.content, p.price, p.image,
-      p.likes_count, p.createddate, CONCAT(u.firstname, ' ', u.lastname) AS authorname, 
-      u.phonenumber, u.photo FROM posts AS p
-      INNER JOIN users AS  u ON p.authorid = u.id
-      WHERE p.id = ?;`;
+      SELECT 
+      p.id AS postid, 
+      p.title, 
+      p.content, 
+      p.likes_count,
+      p.price, 
+      p.createddate, 
+      p.image,
+      IF(pc.postid = p.id, true, false) AS isLiked,          
+      GROUP_CONCAT(DISTINCT c.name ORDER BY c.name ASC SEPARATOR ',') AS categories
+  FROM posts AS p
+  INNER JOIN users AS u ON p.authorid = u.id
+  INNER JOIN post_categories AS pc ON pc.postid = p.id 
+  INNER JOIN categories AS c ON c.id = pc.categoryid
+  GROUP BY p.id 
+  WHERE p.id = ?
+  `;
 
       const post = await queryDb(query, req.query.postid);
       if (post.length > 0) {
