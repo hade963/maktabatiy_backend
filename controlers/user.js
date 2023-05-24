@@ -8,6 +8,7 @@ const multer = require("multer");
 const path = require("path");
 const fs = require("@cyclic.sh/s3fs");
 const { query } = require("express");
+const { use } = require("passport");
 
 const storage = multer.diskStorage({
   filename: (req, file, cb) => {
@@ -145,47 +146,48 @@ exports.user_login = [
     }),
   body("password").escape().trim(),
   async (req, res, next) => {
-    
-    if (req.headers.authorization) {
+    const decoded = jwt.verify(req.headers.authorization.split('Bearer ').join(''), process.env.SECRET);
+    const user = await queryDb('SELECT * FROM users WHERE id = ?', decoded.id);
+    if (user.length > 0) {
       return res.status(400).json({
         msg: "تم تسجيل الدخول بالفعل",
       });
     }
-    try {
-      const errors = validationResult(req);
-
-      if (!errors.isEmpty()) {
-        return res.status(400).json({
-          errors: errors.array(),
+      try {
+        const errors = validationResult(req);
+        
+        if (!errors.isEmpty()) {
+          return res.status(400).json({
+            errors: errors.array(),
         });
       }
-
+      
       const result = await queryDb(
         "SELECT * FROM users WHERE username = ? OR email = ?",
         [req.body.username, req.body.username]
-      );
-
-      const hash = result[0].password;
-      const isPasswordCorrect = await bcrypt.compare(req.body.password, hash);
-      if (isPasswordCorrect) {
-        const token = jwt.sign(
-          { id: result[0].id, username: result[0].username },
-          process.env.SECRET,
-          { expiresIn: "1d" }
         );
-        return res.status(200).json({
-          msg: "تم تسجيل الدخول ",
-          token: token,
-        });
-      } else {
-        return res.status(400).json({
-          msg: "كلمة المرور أو اسم المستخدم خاطئ",
-        });
-      }
-    } catch (err) {
-      console.error(err);
-      next(err);
-    }
+        
+        const hash = result[0].password;
+        const isPasswordCorrect = await bcrypt.compare(req.body.password, hash);
+        if (isPasswordCorrect) {
+          const token = jwt.sign(
+            { id: result[0].id, username: result[0].username },
+            process.env.SECRET,
+            { expiresIn: "1d" }
+            );
+            return res.status(200).json({
+              msg: "تم تسجيل الدخول ",
+              token: token,
+            });
+          } else {
+            return res.status(400).json({
+              msg: "كلمة المرور أو اسم المستخدم خاطئ",
+            });
+          }
+        } catch (err) {
+          console.error(err);
+          next(err);
+        }
   },
 ];
 
@@ -529,8 +531,8 @@ exports.get_user_photo = [
   async (req, res, next) => { 
     try { 
       const user = await queryDb('SElECT * FROM users WHERE id = ? ', req.user);
-      if(user.length > 0 && user.photo) { 
-        return res.sendFile(user.photo);
+      if(user.length > 0 && user[0].photo) { 
+        return res.sendFile(user[0].photo);
       }
       else { 
         return res.status(404).json({
