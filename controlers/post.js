@@ -265,7 +265,7 @@ exports.get_posts = [
       INNER JOIN users AS u ON p.authorid = u.id
       INNER JOIN post_categories AS pc ON pc.postid = p.id 
       INNER JOIN categories AS c ON c.id = pc.categoryid
-      INNER JOIN post_likes AS pl ON pl.post_id = p.id
+      LEFT JOIN post_likes AS pl ON pl.post_id = p.id
       GROUP BY p.id
       ORDER BY p.createddate DESC;`;
 
@@ -313,7 +313,7 @@ exports.get_post = [
     INNER JOIN users AS u ON p.authorid = u.id
     INNER JOIN post_categories AS pc ON pc.postid = p.id 
     INNER JOIN categories AS c ON c.id = pc.categoryid
-    INNER JOIN post_likes AS pl ON pl.post_id = p.id
+    LEFT JOIN post_likes AS pl ON pl.post_id = p.id
     GROUP BY p.id;
   WHERE p.id = ?
   `;
