@@ -407,7 +407,7 @@ exports.get_post_image = [
         req.body.postid
       );
       if (post.length > 0 && post[0].image ) {
-        fs.readFile(post[0].image, (err, data) => { 
+        fs.readFile("./" + post[0].image, (err, data) => { 
           const json = JSON.parse(data);
           if(err) { 
             return res.status(404).json({
