@@ -407,7 +407,12 @@ exports.get_post_image = [
         req.body.postid
       );
       if (post.length > 0 && post[0].image ) {
-        return res.sendfile(post[0].image);
+        fs.readFile(post[0].image, (err, data) => { 
+          const json = JSON.parse(data);
+          return res.status(200).json({
+            image: json,
+          })
+        })
       } else {
         return res.status(404).json({
           msg: "لم يتم العثور على المنشور",
