@@ -406,18 +406,15 @@ exports.get_post_image = [
         "SELECT * FROM posts WHERE id = ? ",
         req.body.postid
       );
-      if (post.length > 0 && post[0].image ) {
-        fs.readFile("./" + post[0].image, (err, data) => { 
-          const json = JSON.parse(data);
-          if(err) { 
+      if (post.length > 0 && post[0].image) {
+        fs.readFile("./" + post[0].image, (err, data) => {
+          if (err) {
             return res.status(404).json({
-              msg: 'لم يتم العثور على الصورة',
-            })
+              msg: "لم يتم العثور على الصورة",
+            });
           }
-          return res.status(200).json({
-            image: json,
-          })
-        })
+          return res.send(data);
+        });
       } else {
         return res.status(404).json({
           msg: "لم يتم العثور على المنشور",
