@@ -279,7 +279,7 @@ exports.get_post = [
       p.id AS postid, 
       p.title, 
       p.author_name AS author,
-      CONCAT(u.firstname, u.lastname) AS username,
+      CONCAT(u.firstname, " ", u.lastname) AS username,
       p.content, 
       p.likes_count,
       p.price, 
