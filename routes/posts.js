@@ -8,6 +8,5 @@ router.delete('/post', post_controler.delete_post);
 router.get('/', post_controler.get_posts);
 router.get('/post', post_controler.get_post);
 router.post('/post/likes', post_controler.add_like);
-router.get('/post/image', post_controler.get_post_image);
 router.get('/categories', post_controler.get_categories);
 module.exports= router;

@@ -347,39 +347,6 @@ exports.get_profile = [
   },
 ];
 
-exports.add_profile_photo = [
-  passport.authenticate("jwt", { session: false }),
-  upload.single("photo"),
-  async (req, res, next) => {
-    const imageRegEx = /\.(gif|jpe?g|jfif|tiff?|png|webp|bmp)$/i;
-
-    if (req.file && imageRegEx.test(req.file.filename)) {
-      fs.writeFile(req.file.filename, req.file.buffer, function (err) {
-        if (err) {
-          console.error(err);
-          return res
-            .status(500)
-            .send("حدث خطأ أثناء رفع الملف الرجاء المحاولة لاحقا");
-        }
-      });
-
-      try {
-        const query = "UPDATE users SET photo = ? WHERE id = ?";
-        await queryDb(query, [req.file.path.replace(/\\/g, "/"), req.user]);
-        return res.status(200).json({
-          msg: "تم اضافة الصورة بنجاح",
-        });
-      } catch (err) {
-        console.log(err);
-        next(err);
-      }
-    } else {
-      return res.status(400).json({
-        msg: "الملف المرسل غير صالح الرجاء المحاولة من جديد",
-      });
-    }
-  },
-];
 
 exports.delete_user = [
   passport.authenticate("jwt", { session: false }),

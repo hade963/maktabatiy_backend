@@ -260,7 +260,7 @@ exports.add_like = [
 ];
 
 exports.get_posts = [
-  passport.authenticate("jwt", { session: false }),
+
   async (req, res, next) => {
     try {
       const query = `
@@ -302,7 +302,6 @@ exports.get_posts = [
 ];
 
 exports.get_post = [
-  passport.authenticate("jwt", { session: false }),
   query("postid")
     .escape()
     .notEmpty()
@@ -388,7 +387,6 @@ exports.delete_post = [
 ];
 
 exports.get_categories = [
-  passport.authenticate("jwt", { session: false }),
   async (req, res, next) => {
     try {
       const categoires = await queryDb("SELECT * FROM categories ");
