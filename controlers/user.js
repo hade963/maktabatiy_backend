@@ -520,25 +520,3 @@ exports.change_user_password = [
     }
   },
 ];
-
-exports.get_user_photo = [
-  passport.authenticate('jwt', {session: false}),
-  async (req, res, next) => { 
-    try { 
-      const user = await queryDb('SElECT * FROM users WHERE id = ? ', req.user);
-      if(user.length > 0 && user[0].photo) { 
-        return res.sendFile(user[0].photo);
-      }
-      else { 
-        return res.status(404).json({
-          msg: 'لم يتم العثور على اي صور للمستخدم',
-        });
-      }
-
-    }
-    catch(err) { 
-      console.log(err);
-      next(err);
-    }
-  }
-]

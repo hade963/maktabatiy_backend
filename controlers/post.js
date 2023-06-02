@@ -272,6 +272,8 @@ exports.get_posts = [
       p.price, 
       p.createddate, 
       p.image,
+      p.author_name AS author,
+      CONCAT(u.firstname, u.lastname) AS username,
       IF(pl.user_id = u.id, true, false) AS isLiked,          
       GROUP_CONCAT(DISTINCT c.name ORDER BY c.name ASC SEPARATOR ',') AS categories
       FROM posts AS p
@@ -315,6 +317,8 @@ exports.get_post = [
       SELECT 
       p.id AS postid, 
       p.title, 
+      p.author_name AS author,
+      CONCAT(u.firstname, u.lastname) AS username,
       p.content, 
       p.likes_count,
       p.price, 
@@ -391,35 +395,6 @@ exports.get_categories = [
       return res.status(200).json({
         categoires: categoires,
       });
-    } catch (err) {
-      console.log(err);
-      next(err);
-    }
-  },
-];
-
-exports.get_post_image = [
-  passport.authenticate("jwt", { session: false }),
-  async (req, res, next) => {
-    try {
-      const post = await queryDb(
-        "SELECT * FROM posts WHERE id = ? ",
-        req.body.postid
-      );
-      if (post.length > 0 && post[0].image) {
-        fs.readFile("./" + post[0].image, (err, data) => {
-          if (err) {
-            return res.status(404).json({
-              msg: "لم يتم العثور على الصورة",
-            });
-          }
-          return res.send(data);
-        });
-      } else {
-        return res.status(404).json({
-          msg: "لم يتم العثور على المنشور",
-        });
-      }
     } catch (err) {
       console.log(err);
       next(err);
