@@ -4,18 +4,7 @@ const db = require("../db");
 const passport = require("passport");
 const jwt = require("jsonwebtoken");
 const { queryDb } = require("../utils");
-const multer = require("multer");
 const path = require("path");
-const fs = require("@cyclic.sh/s3fs");
-const { query } = require("express");
-const { use } = require("passport");
-
-const storage = multer.diskStorage({
-  filename: (req, file, cb) => {
-    cb(null, Date.now() + path.extname(file.originalname));
-  },
-});
-const upload = multer({ storage: storage });
 
 exports.user_signup = [
   body("firstname")

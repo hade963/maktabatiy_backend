@@ -4,14 +4,7 @@ const multer = require("multer");
 const { query, body, validationResult } = require("express-validator");
 const path = require("path");
 const { queryDb } = require("../utils");
-const fs = require("@cyclic.sh/s3fs");
 
-const storage = multer.diskStorage({
-  filename: (req, file, cb) => {
-    cb(null, Date.now() + path.extname(file.originalname));
-  },
-});
-const upload = multer({ storage: storage });
 
 exports.create_post = [
   passport.authenticate("jwt", { session: false }),
@@ -26,8 +19,6 @@ exports.create_post = [
     .withMessage("السعر يجب ان يكون رقم")
     .trim(),
   body("categories").escape().trim(),
-
-  upload.single("image"),
   async (req, res, next) => {
     try {
       const errors = validationResult(req);
@@ -55,25 +46,10 @@ exports.create_post = [
           req.body.price,
           dateTimeString,
         ];
-        const imageRegEx = /\.(gif|jpe?g|jfif|tiff?|png|webp|bmp)$/i;
         let query =
           "INSERT INTO posts (authorid, title, content, price, createddate";
-        if (req.file && imageRegEx.test(req.file.filename)) {
-          postdetails.push(req.file.path.replace(/\\/g, "/"));
-          query += ",image) VALUES (?,?,?,?,?,?)";
-          fs.writeFile(req.file.filename, req.file.buffer, function (err) {
-            if (err) {
-              console.error(err);
-              return res
-                .status(500)
-                .send("حدث خطأ أثناء رفع الملف الرجاء المحاولة لاحقا");
-            }
-          });
-        } else {
           query += ") VALUES (?,?,?,?,?)";
-        }
         await queryDb(query, postdetails);
-
         let categories = [];
         if (req.body.categories) {
           categories = await Promise.all(
@@ -115,7 +91,6 @@ exports.edit_post = [
   body("title").escape(),
   body("content").escape(),
   body("price").escape(),
-  upload.single("image"),
   async (req, res, next) => {
     const errors = validationResult(req);
 
@@ -163,19 +138,6 @@ exports.edit_post = [
             "INSERT INTO post_categories (postid, categoryid) VALUES (?, ?)",
             [req.body.postid, cat]
           );
-        });
-      }
-      const imageRegEx = /\.(gif|jpe?g|jfif|tiff?|png|webp|bmp)$/i;
-      if (req.file && imageRegEx.test(req.file.filename)) {
-        postdetails.push(req.file.path.replace(/\\/g, "/"));
-        query += " image = ?,";
-        fs.writeFile(req.file.filename, req.file.buffer, function (err) {
-          if (err) {
-            console.error(err);
-            return res
-              .status(500)
-              .send("حدث خطأ أثناء رفع الملف الرجاء المحاولة لاحقا");
-          }
         });
       }
       postdetails.push(new Date());
