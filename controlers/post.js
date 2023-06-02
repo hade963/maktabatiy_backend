@@ -239,7 +239,7 @@ exports.get_posts = [
       IF(pl.user_id = u.id, true, false) AS isLiked,          
       GROUP_CONCAT(DISTINCT c.name ORDER BY c.name ASC SEPARATOR ',') AS categories
       FROM posts AS p
-      INNER JOIN users AS u ON p.authorid = u.id
+      INNER JOIN users AS u ON p.userid = u.id
       INNER JOIN post_categories AS pc ON pc.postid = p.id 
       INNER JOIN categories AS c ON c.id = pc.categoryid
       LEFT JOIN post_likes AS pl ON pl.user_id = u.id
@@ -288,7 +288,7 @@ exports.get_post = [
       IF(pl.user_id = u.id, true, false) AS isLiked,          
       GROUP_CONCAT(DISTINCT c.name ORDER BY c.name ASC SEPARATOR ',') AS categories
     FROM posts AS p
-    INNER JOIN users AS u ON p.authorid = u.id
+    INNER JOIN users AS u ON p.userid = u.id
     INNER JOIN post_categories AS pc ON pc.postid = p.id 
     INNER JOIN categories AS c ON c.id = pc.categoryid
     LEFT JOIN post_likes AS pl ON pl.user_id = u.id
