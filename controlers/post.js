@@ -235,7 +235,7 @@ exports.get_posts = [
       p.createddate, 
       p.image,
       p.author_name AS author,
-      CONCAT(u.firstname, u.lastname) AS username,
+      CONCAT(u.firstname,  " ", u.lastname) AS username,
       IF(pl.user_id = u.id, true, false) AS isLiked,          
       GROUP_CONCAT(DISTINCT c.name ORDER BY c.name ASC SEPARATOR ',') AS categories
       FROM posts AS p
