@@ -400,7 +400,7 @@ exports.search_post = [
   if(req.query.author) { 
     whereClause.push(`p.author_name LIKE "%${req.query.author}%"`);
   }
-  if(req.qurey.title) { 
+  if(req.query.title) { 
     whereClause.push(`p.title LIKE "%${req.query.title}%"`);
   }
   if(req.query.like && req.user) { 
