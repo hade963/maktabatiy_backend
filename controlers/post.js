@@ -51,7 +51,7 @@ exports.create_post = [
         ];
         let query =
           "INSERT INTO posts (author_name, userid ,title, content, price, createddate";
-          query += ") VALUES (?,?,?,?,?)";
+          query += ") VALUES (?,?,?,?,?, ?)";
         await queryDb(query, postdetails);
         let categories = [];
         if (req.body.categories) {
@@ -61,7 +61,7 @@ exports.create_post = [
                 "SELECT id from categories where name = ?",
                 cat
               );
-              const r = result[0];
+              const r = result[0];  
               return r.id;
             })
           );
