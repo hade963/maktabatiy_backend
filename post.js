@@ -366,8 +366,6 @@ exports.search_post = [
   passport.authenticate('jwt', {session: false}),
   query('category')
   .escape(),
-  query('title')
-  .escape(),
   query('like')
   .escape(),
   query('myposts')
@@ -400,9 +398,6 @@ exports.search_post = [
   }
   if(req.query.author) { 
     whereClause.push(`p.author_name LIKE "%${req.query.author}%"`);
-  }
-  if(req.qurey.title) { 
-    whereClause.push(`p.title LIKE "%${req.query.title}%"`);
   }
   if(req.query.like && req.user) { 
     whereClause.push("pl.user_id= " + req.user);
