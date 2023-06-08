@@ -1,11 +1,9 @@
 const db = require("../db");
+
 const passport = require("passport");
-const multer = require("multer");
 const { query, body, validationResult } = require("express-validator");
 const path = require("path");
 const { queryDb } = require("../utils");
-const { authenticate } = require("passport");
-
 
 exports.create_post = [
   passport.authenticate("jwt", { session: false }),
@@ -34,7 +32,6 @@ exports.create_post = [
         const year = createdDate.getFullYear();
         const month = `${createdDate.getMonth() + 1}`.padStart(2, "0");
         const day = `${createdDate.getDate()}`.padStart(2, "0");
-
         // get the hours, minutes, and seconds as separate strings
         const hours = `${createdDate.getHours()}`.padStart(2, "0");
         const minutes = `${createdDate.getMinutes()}`.padStart(2, "0");
@@ -105,7 +102,7 @@ exports.edit_post = [
     }
     
     const post = await queryDb(
-      "SELECT * FROM posts WHERE id = ? And authorid = ?",
+      "SELECT * FROM posts WHERE id = ? And userid = ?",
       [req.body.postid, req.user]
     );
     if (post.length > 0) {
@@ -245,11 +242,11 @@ exports.get_posts = [
       p.image,
       p.author_name AS author,
       CONCAT(u.firstname,  " ", u.lastname) AS username,
-      IF(pl.user_id = u.id, true, false) AS isLiked,          
+      IF(pl.user_id = u.id, true, false) AS isLiked,
       GROUP_CONCAT(DISTINCT c.name ORDER BY c.name ASC SEPARATOR ',') AS categories
       FROM posts AS p
       INNER JOIN users AS u ON p.userid = u.id
-      INNER JOIN post_categories AS pc ON pc.postid = p.id 
+      INNER JOIN post_categories AS pc ON pc.postid = p.id
       INNER JOIN categories AS c ON c.id = pc.categoryid
       LEFT JOIN post_likes AS pl ON pl.user_id = u.id
       GROUP BY p.id
