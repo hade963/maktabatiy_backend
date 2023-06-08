@@ -43,7 +43,7 @@ exports.create_post = [
         // combine the createdDate and time strings into a single string in the desired format
         const dateTimeString = `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
         const postdetails = [
-          req.author_name,
+          req.author,
           req.user,
           req.body.title,
           req.body.content,
