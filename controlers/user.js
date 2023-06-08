@@ -172,7 +172,7 @@ exports.user_login = [
           const token = jwt.sign(
             { id: result[0].id, username: result[0].username },
             process.env.SECRET,
-            { expiresIn: "1d" }
+            { expiresIn: "1w" }
             );
             return res.status(200).json({
               msg: "تم تسجيل الدخول ",
