@@ -63,7 +63,7 @@ exports.create_post = [
             })
           );
           const post = await queryDb(
-            "SELECT * FROM posts WHERE title = ? AND authorid = ? AND createddate LIKE ?",
+            "SELECT * FROM posts WHERE title = ? AND userid = ? AND createddate LIKE ?",
             [req.body.title, req.user, dateTimeString]
           );
           categories.forEach(async (e) => {
@@ -149,10 +149,10 @@ exports.edit_post = [
       postdetails.push(new Date());
       postdetails.push(req.body.postid);
       postdetails.push(req.user);
-      query += " createddate = ? WHERE id = ? and authorid = ? ";
+      query += " createddate = ? WHERE id = ? and userid = ? ";
       try {
         const post = await queryDb(
-          "SELECT authorid FROM posts WHERE id = ? ",
+          "SELECT userid FROM posts WHERE id = ? ",
           req.body.postid
         );
         await queryDb(query, postdetails);
@@ -184,7 +184,7 @@ exports.add_like = [
   async (req, res, next) => {
     try {
       const post = await queryDb(
-        "SELECT  * FROM posts WHERE id = ? AND authorid = ?",
+        "SELECT  * FROM posts WHERE id = ? AND userid = ?",
         [req.body.postid, req.user]
       );
       if (post.length > 0) {
@@ -198,7 +198,7 @@ exports.add_like = [
             [req.user, +req.body.postid]
           );
           await queryDb(
-            "UPDATE posts SET likes_count = likes_count -1 WHERE authorid = ? AND id = ?",
+            "UPDATE posts SET likes_count = likes_count -1 WHERE userid = ? AND id = ?",
             [req.user, +req.body.postid]
           );
           return res.status(200).json({
@@ -210,7 +210,7 @@ exports.add_like = [
             [req.user, +req.body.postid]
           );
           await queryDb(
-            "UPDATE posts SET likes_count = likes_count + 1 WHERE authorid = ? AND id = ?",
+            "UPDATE posts SET likes_count = likes_count + 1 WHERE userid = ? AND id = ?",
             [req.user, +req.body.postid]
           );
           return res.status(200).json({
@@ -246,8 +246,8 @@ exports.get_posts = [
       GROUP_CONCAT(DISTINCT c.name ORDER BY c.name ASC SEPARATOR ',') AS categories
       FROM posts AS p
       INNER JOIN users AS u ON p.userid = u.id
-      INNER JOIN post_categories AS pc ON pc.postid = p.id
-      INNER JOIN categories AS c ON c.id = pc.categoryid
+      LEFT JOIN post_categories AS pc ON pc.postid = p.id
+      LEFT JOIN categories AS c ON c.id = pc.categoryid
       LEFT JOIN post_likes AS pl ON pl.user_id = u.id
       GROUP BY p.id
       ORDER BY p.createddate DESC;`;
@@ -325,11 +325,11 @@ exports.delete_post = [
     try {
       if (req.body.postid) {
         const post = await queryDb(
-          "SELECT * FROM posts WHERE id = ? AND authorid = ?",
+          "SELECT * FROM posts WHERE id = ? AND userid = ?",
           [req.body.postid, req.user]
         );
         if (post.length > 0) {
-          await queryDb("DELETE FROM posts WHERE id = ? AND authorid = ?", [
+          await queryDb("DELETE FROM posts WHERE id = ? AND userid = ?", [
             req.body.postid,
             req.user,
           ]);
