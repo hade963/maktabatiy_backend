@@ -19,8 +19,10 @@ exports.create_post = [
     .isNumeric()
     .withMessage("السعر يجب ان يكون رقم")
     .trim(),
-  body("categories").escape().trim(),
-  async (req, res, next) => {
+    body("categories").escape().trim(),
+    body("author")
+    .escape(),
+    async (req, res, next) => {
     try {
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
@@ -41,6 +43,7 @@ exports.create_post = [
         // combine the createdDate and time strings into a single string in the desired format
         const dateTimeString = `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
         const postdetails = [
+          req.author_name,
           req.user,
           req.body.title,
           req.body.content,
@@ -48,7 +51,7 @@ exports.create_post = [
           dateTimeString,
         ];
         let query =
-          "INSERT INTO posts (authorid, title, content, price, createddate";
+          "INSERT INTO posts (author_name, userid ,title, content, price, createddate";
           query += ") VALUES (?,?,?,?,?)";
         await queryDb(query, postdetails);
         let categories = [];
@@ -92,6 +95,7 @@ exports.edit_post = [
   body("title").escape(),
   body("content").escape(),
   body("price").escape(),
+  body('aurhor'),
   async (req, res, next) => {
     const errors = validationResult(req);
 
@@ -100,6 +104,7 @@ exports.edit_post = [
         errors: errors.array(),
       });
     }
+    
     const post = await queryDb(
       "SELECT * FROM posts WHERE id = ? And authorid = ?",
       [req.body.postid, req.user]
@@ -118,6 +123,10 @@ exports.edit_post = [
       if (req.body.price) {
         postdetails.push(+req.body.price);
         query += ` price = ?,`;
+      }
+      if(req.body.author) { 
+        postdetails.push(req.body.author);
+        query += ` author_name =?,`;
       }
       let categories = [];
       if (req.body.categories) {
