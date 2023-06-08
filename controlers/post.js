@@ -39,11 +39,10 @@ exports.create_post = [
         const hours = `${createdDate.getHours()}`.padStart(2, "0");
         const minutes = `${createdDate.getMinutes()}`.padStart(2, "0");
         const seconds = `${createdDate.getSeconds()}`.padStart(2, "0");
-
         // combine the createdDate and time strings into a single string in the desired format
         const dateTimeString = `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
         const postdetails = [
-          req.author,
+          req.body.author,
           req.user,
           req.body.title,
           req.body.content,
