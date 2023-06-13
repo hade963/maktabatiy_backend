@@ -147,6 +147,7 @@ exports.user_login = [
         }
       }
       catch(err) { 
+        console.log(err);
         return res.status(400).json({
           msg: 'حدث خطاء انثاء التسجيل  المعلومات غير صحيحة',
         });
