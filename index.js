@@ -22,7 +22,7 @@ const { queryDb } = require("./utils");
 app.use("/user", userRouter);
 app.use("/posts", postRouter);
 
-app.listen(3000, () => {
+app.listen(5000, () => {
   console.log(`server started on port 3000`);
 });
 process.on("unhandledRejection", (err) => {

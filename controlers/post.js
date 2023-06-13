@@ -242,7 +242,7 @@ exports.get_posts = [
       p.image,
       p.author_name AS author,
       CONCAT(u.firstname,  " ", u.lastname) AS username,
-      IF(pl.user_id = u.id, true, false) AS isLiked,
+      IF(pl.user_id = u.id AND pl.post_id = p.id, true, false) AS isLiked,
       GROUP_CONCAT(DISTINCT c.name ORDER BY c.name ASC SEPARATOR ',') AS categories
       FROM posts AS p
       INNER JOIN users AS u ON p.userid = u.id
