@@ -184,8 +184,8 @@ exports.add_like = [
   async (req, res, next) => {
     try {
       const post = await queryDb(
-        "SELECT  * FROM posts WHERE id = ? AND userid = ?",
-        [req.body.postid, req.user]
+        "SELECT  * FROM posts WHERE id = ?",
+        [req.body.postid]
       );
       if (post.length > 0) {
         const result = await queryDb(
@@ -198,8 +198,8 @@ exports.add_like = [
             [req.user, +req.body.postid]
           );
           await queryDb(
-            "UPDATE posts SET likes_count = likes_count -1 WHERE userid = ? AND id = ?",
-            [req.user, +req.body.postid]
+            "UPDATE posts SET likes_count = likes_count -1 WHERE id = ?",
+            [+req.body.postid]
           );
           return res.status(200).json({
             msg: "تم الغاء الاعجاب بالمنشور بنجاح",
@@ -210,15 +210,15 @@ exports.add_like = [
             [req.user, +req.body.postid]
           );
           await queryDb(
-            "UPDATE posts SET likes_count = likes_count + 1 WHERE userid = ? AND id = ?",
-            [req.user, +req.body.postid]
+            "UPDATE posts SET likes_count = likes_count + 1 WHERE id = ?",
+            [+req.body.postid]
           );
           return res.status(200).json({
             msg: "تم الاعجاب بالمنشور بنجاح",
           });
         }
       } else {
-        res.status(404).json("لم يتم العثور على المنشور المطلوب");
+        res.status(404).json({msg: "لم يتم العثور على المنشور المطلوب"});
       }
     } catch (err) {
       console.error(err);
