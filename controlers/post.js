@@ -284,21 +284,20 @@ exports.get_post = [
       p.id AS postid, 
       p.title, 
       p.author_name AS author,
-      CONCAT(u.firstname, " ", u.lastname) AS username,
+      u.username,
       p.content, 
       p.likes_count,
       p.price, 
       p.createddate, 
-      p.image,
-      IF(pl.user_id = u.id, true, false) AS isLiked,          
+      IF(pl.user_id = u.id AND p.id = pl.post_id, true, false) AS isLiked,
       GROUP_CONCAT(DISTINCT c.name ORDER BY c.name ASC SEPARATOR ',') AS categories
-    FROM posts AS p
-    INNER JOIN users AS u ON p.userid = u.id
-    INNER JOIN post_categories AS pc ON pc.postid = p.id 
-    INNER JOIN categories AS c ON c.id = pc.categoryid
-    LEFT JOIN post_likes AS pl ON pl.user_id = u.id
-    GROUP BY p.id;
-  WHERE p.id = ?
+      FROM posts AS p
+      INNER JOIN users AS u ON p.userid = u.id
+      LEFT JOIN post_categories AS pc ON pc.postid = p.id 
+      LEFT JOIN categories AS c ON c.id = pc.categoryid
+      LEFT JOIN post_likes AS pl ON pl.user_id = u.id
+      WHERE p.id = ?
+      GROUP BY p.id;
   `;
 
       const post = await queryDb(query, req.query.postid);
