@@ -118,7 +118,6 @@ exports.user_signup = [
   },
 ];
 
-
 exports.user_login = [
   body("username")
     .trim()
@@ -135,59 +134,64 @@ exports.user_login = [
     }),
   body("password").escape().trim(),
   async (req, res, next) => {
-    if(req.headers.authorization) { 
+    if (req.headers.authorization) {
       let decoded;
       try {
-        decoded = jwt.verify(req.headers.authorization.split('Bearer ').join(''), process.env.SECRET);
-        const user = await queryDb('SELECT * FROM users WHERE id = ?', decoded.id);
+        decoded = jwt.verify(
+          req.headers.authorization.split("Bearer ").join(""),
+          process.env.SECRET
+        );
+        const user = await queryDb(
+          "SELECT * FROM users WHERE id = ?",
+          decoded.id
+        );
         if (user.length > 0) {
           return res.status(400).json({
             msg: "تم تسجيل الدخول بالفعل",
           });
         }
-      }
-      catch(err) { 
+      } catch (err) {
         console.log(err);
         return res.status(400).json({
-          msg: 'حدث خطاء انثاء التسجيل  المعلومات غير صحيحة',
+          msg: "حدث خطاء انثاء التسجيل  المعلومات غير صحيحة",
         });
       }
     }
-      try {
-        const errors = validationResult(req);
-        
-        if (!errors.isEmpty()) {
-          return res.status(400).json({
-            errors: errors.array(),
+    try {
+      const errors = validationResult(req);
+
+      if (!errors.isEmpty()) {
+        return res.status(400).json({
+          errors: errors.array(),
         });
       }
-      
+
       const result = await queryDb(
         "SELECT * FROM users WHERE username = ? OR email = ?",
         [req.body.username, req.body.username]
+      );
+
+      const hash = result[0].password;
+      const isPasswordCorrect = await bcrypt.compare(req.body.password, hash);
+      if (isPasswordCorrect) {
+        const token = jwt.sign(
+          { id: result[0].id, username: result[0].username },
+          process.env.SECRET,
+          { expiresIn: "1w" }
         );
-        
-        const hash = result[0].password;
-        const isPasswordCorrect = await bcrypt.compare(req.body.password, hash);
-        if (isPasswordCorrect) {
-          const token = jwt.sign(
-            { id: result[0].id, username: result[0].username },
-            process.env.SECRET,
-            { expiresIn: "1w" }
-            );
-            return res.status(200).json({
-              msg: "تم تسجيل الدخول ",
-              token: token,
-            });
-          } else {
-            return res.status(400).json({
-              msg: "كلمة المرور أو اسم المستخدم خاطئ",
-            });
-          }
-        } catch (err) {
-          console.error(err);
-          next(err);
-        }
+        return res.status(200).json({
+          msg: "تم تسجيل الدخول ",
+          token: token,
+        });
+      } else {
+        return res.status(400).json({
+          msg: "كلمة المرور أو اسم المستخدم خاطئ",
+        });
+      }
+    } catch (err) {
+      console.error(err);
+      next(err);
+    }
   },
 ];
 
@@ -292,7 +296,7 @@ exports.get_cart_items = [
     try {
       const query = `
       SELECT c.quantity, c.id AS cart_id, p.title, p.content,
-      p.price *c.quantity AS final_price,p.price AS price_for_unit ,p.image, p.id AS postid   FROM cart AS c
+      p.price *c.quantity AS final_price,p.price AS price_for_unit , p.id AS postid   FROM cart AS c
       INNER JOIN posts As p ON c.postid = p.id WHERE c.userid = ?;`;
 
       const itemsInCart = await queryDb(query, [req.user]);
@@ -337,14 +341,12 @@ exports.get_profile = [
   },
 ];
 
-
 exports.delete_user = [
   passport.authenticate("jwt", { session: false }),
   body("username").escape(),
   async (req, res, next) => {
     try {
       if (req.body.username) {
-        req.session.destroy();
         await queryDb("DELETE  FROM users WHERE id = ? AND username = ?", [
           req.user,
           req.body.username,
