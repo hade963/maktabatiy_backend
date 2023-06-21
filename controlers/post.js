@@ -248,10 +248,10 @@ exports.get_posts = [
       INNER JOIN users AS u ON p.userid = u.id
       LEFT JOIN post_categories AS pc ON pc.postid = p.id
       LEFT JOIN categories AS c ON c.id = pc.categoryid
-      LEFT JOIN post_likes AS pl ON pl.user_id = u.id
+      LEFT JOIN post_likes AS pl ON pl.user_id = ? AND pl.post_id = p.id
       GROUP BY p.id
       ORDER BY p.createddate DESC;`;
-      const posts = await queryDb(query);
+      const posts = await queryDb(query, [req.user]);
       if (posts.length > 0) {
         return res.status(200).json({
           posts: posts,
@@ -295,12 +295,12 @@ exports.get_post = [
       INNER JOIN users AS u ON p.userid = u.id
       LEFT JOIN post_categories AS pc ON pc.postid = p.id 
       LEFT JOIN categories AS c ON c.id = pc.categoryid
-      LEFT JOIN post_likes AS pl ON pl.user_id = u.id
-      WHERE p.id = ?
+      LEFT JOIN post_likes AS pl ON pl.post_id = p.id AND pl.user_id = ?
+      WHERE p.id = ? 
       GROUP BY p.id;
   `;
 
-      const post = await queryDb(query, req.query.postid);
+      const post = await queryDb(query, [req.user,req.query.postid]);
       if (post.length > 0) {
         res.status(200).json({
           post: post,
