@@ -242,7 +242,7 @@ exports.get_posts = [
       p.image,
       p.author_name AS author,
       CONCAT(u.firstname,  " ", u.lastname) AS username,
-      IF(pl.user_id = u.id AND pl.post_id = p.id, true, false) AS isLiked,
+      IF(pl.user_id = ? AND pl.post_id = p.id, true, false) AS isLiked,
       GROUP_CONCAT(DISTINCT c.name ORDER BY c.name ASC SEPARATOR ',') AS categories
       FROM posts AS p
       INNER JOIN users AS u ON p.userid = u.id
@@ -251,7 +251,7 @@ exports.get_posts = [
       LEFT JOIN post_likes AS pl ON pl.user_id = ? AND pl.post_id = p.id
       GROUP BY p.id
       ORDER BY p.createddate DESC;`;
-      const posts = await queryDb(query, [req.user]);
+      const posts = await queryDb(query, [req.user, req.user]);
       if (posts.length > 0) {
         return res.status(200).json({
           posts: posts,
@@ -300,7 +300,7 @@ exports.get_post = [
       GROUP BY p.id;
   `;
 
-      const post = await queryDb(query, [req.user,req.query.postid]);
+      const post = await queryDb(query, [req.user, req.user,req.query.postid]);
       if (post.length > 0) {
         res.status(200).json({
           post: post,
