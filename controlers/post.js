@@ -232,24 +232,23 @@ exports.get_posts = [
   async (req, res, next) => {
     try {
       const query = `
-      SELECT 
-      p.id AS postid, 
-      p.title, 
-      p.content, 
-      p.likes_count,
-      p.price, 
-      p.createddate, 
-      p.image,
+      SELECT
+      p.id AS postid,
+      p.title,
       p.author_name AS author,
-      CONCAT(u.firstname,  " ", u.lastname) AS username,
+      u.username,
+      p.content,
+      p.likes_count,
+      p.price,
+      p.createddate,
       IF(pl.user_id = ? AND pl.post_id = p.id, true, false) AS isLiked,
       GROUP_CONCAT(DISTINCT c.name ORDER BY c.name ASC SEPARATOR ',') AS categories
-      FROM posts AS p
-      INNER JOIN users AS u ON p.userid = u.id
-      LEFT JOIN post_categories AS pc ON pc.postid = p.id
-      LEFT JOIN categories AS c ON c.id = pc.categoryid
-      LEFT JOIN post_likes AS pl ON pl.user_id = ?
-      GROUP BY p.id
+  FROM posts AS p
+  INNER JOIN users AS u ON p.userid = u.id
+  LEFT JOIN post_categories AS pc ON pc.postid = p.id
+  LEFT JOIN categories AS c ON c.id = pc.categoryid
+  LEFT JOIN post_likes AS pl ON pl.user_id = ? AND pl.post_id = p.id
+  GROUP BY p.id;
       ORDER BY p.createddate DESC;`;
       const posts = await queryDb(query, [req.user, req.user]);
       if (posts.length > 0) {
@@ -280,24 +279,24 @@ exports.get_post = [
         return res.send({ errors: result.array() });
       }
       const query = `
-      SELECT 
-      p.id AS postid, 
-      p.title, 
+      SELECT
+      p.id AS postid,
+      p.title,
       p.author_name AS author,
       u.username,
-      p.content, 
+      p.content,
       p.likes_count,
-      p.price, 
-      p.createddate, 
-      IF(pl.user_id = ? AND  pl.post_id = p.id, true, false) AS isLiked,
+      p.price,
+      p.createddate,
+      IF(pl.user_id = ? AND pl.post_id = p.id, true, false) AS isLiked,
       GROUP_CONCAT(DISTINCT c.name ORDER BY c.name ASC SEPARATOR ',') AS categories
-      FROM posts AS p
-      INNER JOIN users AS u ON p.userid = u.id
-      LEFT JOIN post_categories AS pc ON pc.postid = p.id 
-      LEFT JOIN categories AS c ON c.id = pc.categoryid
-      LEFT JOIN post_likes AS pl ON pl.user_id = ?
-      WHERE p.id = ? 
-      GROUP BY p.id;
+  FROM posts AS p
+  INNER JOIN users AS u ON p.userid = u.id
+  LEFT JOIN post_categories AS pc ON pc.postid = p.id
+  LEFT JOIN categories AS c ON c.id = pc.categoryid
+  LEFT JOIN post_likes AS pl ON pl.user_id = ? AND pl.post_id = p.id
+  WHERE p.id = ?
+  GROUP BY p.id;
   `;
 
       const post = await queryDb(query, [req.user, req.user,req.query.postid]);
