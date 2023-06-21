@@ -248,7 +248,7 @@ exports.get_posts = [
       INNER JOIN users AS u ON p.userid = u.id
       LEFT JOIN post_categories AS pc ON pc.postid = p.id
       LEFT JOIN categories AS c ON c.id = pc.categoryid
-      LEFT JOIN post_likes AS pl ON pl.user_id = ? AND pl.post_id = p.id
+      LEFT JOIN post_likes AS pl ON pl.user_id = ?
       GROUP BY p.id
       ORDER BY p.createddate DESC;`;
       const posts = await queryDb(query, [req.user, req.user]);
@@ -295,7 +295,7 @@ exports.get_post = [
       INNER JOIN users AS u ON p.userid = u.id
       LEFT JOIN post_categories AS pc ON pc.postid = p.id 
       LEFT JOIN categories AS c ON c.id = pc.categoryid
-      LEFT JOIN post_likes AS pl ON pl.post_id = p.id AND pl.user_id = ?
+      LEFT JOIN post_likes AS pl ON pl.user_id = ?
       WHERE p.id = ? 
       GROUP BY p.id;
   `;
