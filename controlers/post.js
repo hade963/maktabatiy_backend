@@ -289,7 +289,7 @@ exports.get_post = [
       p.likes_count,
       p.price, 
       p.createddate, 
-      IF(pl.user_id = ? AND p.id = pl.post_id, true, false) AS isLiked,
+      IF(pl.user_id = ? AND  pl.post_id = p.id, true, false) AS isLiked,
       GROUP_CONCAT(DISTINCT c.name ORDER BY c.name ASC SEPARATOR ',') AS categories
       FROM posts AS p
       INNER JOIN users AS u ON p.userid = u.id
