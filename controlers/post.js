@@ -198,7 +198,7 @@ exports.add_like = [
             [req.user, +req.body.postid]
           );
           await queryDb(
-            "UPDATE posts SET likes_count = likes_count -1 WHERE id = ?",
+            "UPDATE posts SET likes_count = likes_count - 1 WHERE id = ?",
             [+req.body.postid]
           );
           return res.status(200).json({
