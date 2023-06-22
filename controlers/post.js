@@ -1,5 +1,5 @@
 const db = require("../db");
-
+const jwt = require('jsonwebtoken');
 const passport = require("passport");
 const { query, body, validationResult } = require("express-validator");
 const path = require("path");
