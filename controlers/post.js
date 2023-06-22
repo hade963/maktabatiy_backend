@@ -248,8 +248,8 @@ exports.get_posts = [
   LEFT JOIN post_categories AS pc ON pc.postid = p.id
   LEFT JOIN categories AS c ON c.id = pc.categoryid
   LEFT JOIN post_likes AS pl ON pl.user_id = ? AND pl.post_id = p.id
-  GROUP BY p.id;
-      ORDER BY p.createddate DESC;`;
+  GROUP BY p.id
+  ORDER BY p.createddate DESC;`;
       const posts = await queryDb(query, [req.user, req.user]);
       if (posts.length > 0) {
         return res.status(200).json({
