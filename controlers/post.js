@@ -4,6 +4,7 @@ const passport = require("passport");
 const { query, body, validationResult } = require("express-validator");
 const path = require("path");
 const { queryDb } = require("../utils");
+const e = require("express");
 
 exports.create_post = [
   passport.authenticate("jwt", { session: false }),
@@ -228,8 +229,21 @@ exports.add_like = [
 ];
 
 exports.get_posts = [
-
   async (req, res, next) => {
+    let userid;
+
+    if (req.headers.authorization) {
+      let decoded;
+      try {
+        decoded = jwt.verify(
+          req.headers.authorization.split("Bearer ").join(""),
+          process.env.SECRET
+        );
+        userid = decoded.id;
+      }catch(err) { 
+        console.log(err);
+      }
+    }
     try {
       const query = `
       SELECT
@@ -250,7 +264,7 @@ exports.get_posts = [
   LEFT JOIN post_likes AS pl ON pl.user_id = ? AND pl.post_id = p.id
   GROUP BY p.id
   ORDER BY p.createddate DESC;`;
-      const posts = await queryDb(query, [req.user, req.user]);
+      const posts = await queryDb(query, [userid, userid]);
       if (posts.length > 0) {
         return res.status(200).json({
           posts: posts,
@@ -273,6 +287,20 @@ exports.get_post = [
     .notEmpty()
     .withMessage("معرف المنشور لا يمكن أن يكون فارغا"),
   async (req, res, next) => {
+    let userid;
+
+    if (req.headers.authorization) {
+      let decoded;
+      try {
+        decoded = jwt.verify(
+          req.headers.authorization.split("Bearer ").join(""),
+          process.env.SECRET
+        );
+        userid = decoded.id;
+      }catch(err) { 
+        console.log(err);
+      }
+    }
     try {
       const result = validationResult(req);
       if (!result.isEmpty()) {
@@ -299,7 +327,7 @@ exports.get_post = [
   GROUP BY p.id;
   `;
 
-      const post = await queryDb(query, [req.user, req.user,req.query.postid]);
+      const post = await queryDb(query, [userid, userid,req.query.postid]);
       if (post.length > 0) {
         res.status(200).json({
           post: post,
